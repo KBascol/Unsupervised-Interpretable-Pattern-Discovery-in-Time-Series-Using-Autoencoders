@@ -14,7 +14,7 @@ PARSER.add_argument("--scratch", dest='from_scratch', action='store_const',
                     const=True, default=False, help="Enable learning from scratch.")
 
 PARSER.add_argument("dataset_path", type=str, default="dataset",
-                    help="Path of the dataset directory.")
+                    help="Path of the json dataset file.")
 
 PARSER.add_argument("doc_length", type=int, default=500,
                     help="Length of a temporal document.")
@@ -59,7 +59,7 @@ PARSER.add_argument("expe_file", type=str, default="expe",
                     help="Used as prefix of the output files path.")
 
 PARSER.add_argument("gpu", type=str, default="0",
-                    help="GPU to be used index.")
+                    help="GPU-to-be-used index.")
 
 ARGV = PARSER.parse_args()
 
@@ -214,7 +214,7 @@ def run_test():
                 latent = np.expand_dims(latent, axis=3)
                 writer.add_summary(sess.run(tf.summary.image(expe_group + "/" + "latent_" + str(example_i), latent)))
 
-        #auto_enc.save_npy(sess, ARGV.blue_npy_path)
+        auto_enc.save_npy(sess, ARGV.weights_path)
 
 if __name__ == '__main__':
     run_test()

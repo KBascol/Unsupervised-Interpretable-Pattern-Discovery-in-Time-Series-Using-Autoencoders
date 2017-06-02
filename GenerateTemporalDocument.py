@@ -19,11 +19,11 @@ PARSER.add_argument("--gene_img", dest='gene_img', action='store_const',
                     const=True, default=False,
                     help="Also generate png versions of the generated temporal documents.")
 
-PARSER.add_argument("nb_test_tdoc", type=int, default=200,
-                    help="Number of test examples in dataset")
-
 PARSER.add_argument("nb_doc", type=int, default=600,
                     help="Number of temporal document to be generated.")
+
+PARSER.add_argument("nb_test_tdoc", type=int, default=200,
+                    help="Number of test examples in dataset")
 
 PARSER.add_argument("doc_length", type=int, default=25,
                     help="Length of a temporal document")

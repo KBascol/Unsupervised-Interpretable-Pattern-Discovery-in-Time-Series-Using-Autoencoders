@@ -1,0 +1,11 @@
+{
+    "test": [
+        "Example_Dataset/Tdocs/Tdoc_5.txt",
+        "Example_Dataset/Tdocs/Tdoc_2.txt"
+    ],
+    "train": [
+        "Example_Dataset/Tdocs/Tdoc_1.txt",
+        "Example_Dataset/Tdocs/Tdoc_3.txt",
+        "Example_Dataset/Tdocs/Tdoc_4.txt"
+    ]
+}

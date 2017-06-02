@@ -92,3 +92,8 @@ optional arguments:
    * show help
 *  --gene_img
    * Also generate png versions of the generated temporal documents.
+   
+   
+   
+The example of dataset was created by the command 
+   * python3 GenerateTemporalDocument.py --gene_img 5 2 500 25 JennaSue.ttf 20 Egg_Eggplant_Plant 45 10 3500 4500 0.33 Example_Dataset

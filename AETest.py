@@ -89,7 +89,7 @@ def run_test(argv):
             return None
 
         sess.run(tf.global_variables_initializer())
-        writer = tf.summary.FileWriter("Testers/Logs/Stage/tensorboard/"+run_name, sess.graph)
+        writer = tf.summary.FileWriter("tensorboard/"+run_name, sess.graph)
         tf.summary.scalar(expe_group + "/" + "mse", c_func)
         tf.summary.scalar(expe_group + "/" + "cost", cost)
         summary_op = tf.summary.merge_all()
@@ -210,7 +210,7 @@ if __name__ == '__main__':
     PARSER.add_argument("--lambdaKL", type=float, default=0.001,
                         help="Kullback on latent coefficient.")
 
-    PARSER.add_argument("--expe_file", type=str, default="expe/res",
+    PARSER.add_argument("--expe_file", type=str, default="expe/results",
                         help="Used as prefix of the output files path.")
 
     PARSER.add_argument("--gpu", type=str, default="0",

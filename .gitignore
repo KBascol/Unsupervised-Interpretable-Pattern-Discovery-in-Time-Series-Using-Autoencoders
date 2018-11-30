@@ -99,3 +99,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# sublim text
+*.sublime-project
+*.sublime-workspace
+
+tensorboard/*
+
+*.npy

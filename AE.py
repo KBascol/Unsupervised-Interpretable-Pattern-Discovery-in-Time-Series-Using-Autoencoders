@@ -78,7 +78,7 @@ class AutoEnc(object):
                                                               filters_length,
                                                               inputs_shape[-1],
                                                               out_channels,
-                                                              "1")
+                                                              name)
 
             conv = tf.nn.conv2d(inputs, self.encode_filt,
                                 [1, stride, stride, 1], padding='VALID')
@@ -173,7 +173,12 @@ class AutoEnc(object):
         """ get a value from pretrained weights if exists """
 
         if self.data_dict is not None and name in self.data_dict:
-            return self.data_dict[name]
+            weight = self.data_dict[name]
+
+            if isinstance(weight, dict):
+                weight = weight[0]
+
+            return weight
         else:
             return initial_value
 

@@ -116,6 +116,8 @@ def run_test(argv):
 
                 writer.add_summary(summary, iterat)
 
+            auto_enc.save_npy(sess, argv.weights_path)
+
         log.info("Test step")
         for variable in tf.trainable_variables():
             if "/filter" in variable.name:
@@ -156,7 +158,6 @@ def run_test(argv):
                 latent = np.expand_dims(latent, axis=3)
                 writer.add_summary(sess.run(tf.summary.image(expe_group + "/" + "latent_" + str(example_i), latent)))
 
-        auto_enc.save_npy(sess, argv.weights_path)
 
 if __name__ == '__main__':
     PARSER = argparse.ArgumentParser(description="Autoencoder Test.")
@@ -167,7 +168,7 @@ if __name__ == '__main__':
     PARSER.add_argument("--scratch", dest='from_scratch', action='store_const',
                         const=True, default=False, help="Enable learning from scratch.")
 
-    PARSER.add_argument("--dataset_path", type=str, default="dataset",
+    PARSER.add_argument("--dataset_path", type=str, default="Example_Dataset/dataset.json",
                         help="Path of the json dataset file.")
 
     PARSER.add_argument("--doc_length", type=int, default=500,
@@ -209,7 +210,7 @@ if __name__ == '__main__':
     PARSER.add_argument("--lambdaKL", type=float, default=0.001,
                         help="Kullback on latent coefficient.")
 
-    PARSER.add_argument("--expe_file", type=str, default="expe",
+    PARSER.add_argument("--expe_file", type=str, default="expe/res",
                         help="Used as prefix of the output files path.")
 
     PARSER.add_argument("--gpu", type=str, default="0",

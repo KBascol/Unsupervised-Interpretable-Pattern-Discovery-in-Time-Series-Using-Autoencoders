@@ -167,52 +167,52 @@ if __name__ == '__main__':
     PARSER.add_argument("--scratch", dest='from_scratch', action='store_const',
                         const=True, default=False, help="Enable learning from scratch.")
 
-    PARSER.add_argument("dataset_path", type=str, default="dataset",
+    PARSER.add_argument("--dataset_path", type=str, default="dataset",
                         help="Path of the json dataset file.")
 
-    PARSER.add_argument("doc_length", type=int, default=500,
+    PARSER.add_argument("--doc_length", type=int, default=500,
                         help="Length of a temporal document.")
 
-    PARSER.add_argument("doc_height", type=int, default=10,
+    PARSER.add_argument("--doc_height", type=int, default=10,
                         help="Height of a temporal document.")
 
-    PARSER.add_argument("nb_filters", type=int, default=10,
+    PARSER.add_argument("--nb_filters", type=int, default=10,
                         help="Number of filters given.")
 
-    PARSER.add_argument("filters_length", type=int, default=45,
+    PARSER.add_argument("--filters_length", type=int, default=45,
                         help="Length of the given filters.")
 
-    PARSER.add_argument("weights_path", type=str, default="ae_weights.npy",
+    PARSER.add_argument("--weights_path", type=str, default="ae_weights.npy",
                         help="Path of the network weigths file.")
 
-    PARSER.add_argument("iterations", type=int, default=1000,
+    PARSER.add_argument("--iterations", type=int, default=1000,
                         help="Number of training iterations.")
 
-    PARSER.add_argument("batches_size", type=int, default=200,
+    PARSER.add_argument("--batches_size", type=int, default=200,
                         help="Number of examples in each batches")
 
-    PARSER.add_argument("gradient_algorithm", type=str, default="adam",
+    PARSER.add_argument("--gradient_algorithm", type=str, default="adam",
                         help="Algorithm used for gradient descent (SGD, momentum, ADAM).")
 
-    PARSER.add_argument("learning_rate", type=float, default=0.0001,
+    PARSER.add_argument("--learning_rate", type=float, default=0.0001,
                         help="Learning rate used in training.")
 
-    PARSER.add_argument("momentum", type=float, default=0.9,
+    PARSER.add_argument("--momentum", type=float, default=0.9,
                         help="Momentum used in training.")
 
-    PARSER.add_argument("lambdaGL", type=float, default=1.0,
+    PARSER.add_argument("--lambdaGL", type=float, default=1.0,
                         help="Group lasso coefficient on first encode filters and last decode filters.")
 
-    PARSER.add_argument("lambdaL", type=float, default=0.001,
+    PARSER.add_argument("--lambdaL", type=float, default=0.001,
                         help="Lasso coefficient on first encode filters and last decode filters.")
 
-    PARSER.add_argument("lambdaKL", type=float, default=0.001,
+    PARSER.add_argument("--lambdaKL", type=float, default=0.001,
                         help="Kullback on latent coefficient.")
 
-    PARSER.add_argument("expe_file", type=str, default="expe",
+    PARSER.add_argument("--expe_file", type=str, default="expe",
                         help="Used as prefix of the output files path.")
 
-    PARSER.add_argument("gpu", type=str, default="0",
+    PARSER.add_argument("--gpu", type=str, default="0",
                         help="GPU-to-be-used index.")
 
     log.basicConfig(level=log.DEBUG,

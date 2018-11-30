@@ -216,6 +216,6 @@ def adarelu(latent):
 
     zeros = tf.zeros_like(latent)
 
-    return tf.where(tf.greater(latent, tf.reduce_max(latent, axis=2, keep_dims=True)*0.66),
+    return tf.where(tf.greater(latent, tf.reduce_max(latent, axis=2, keepdims=True)*0.66),
                     latent,
                     zeros)

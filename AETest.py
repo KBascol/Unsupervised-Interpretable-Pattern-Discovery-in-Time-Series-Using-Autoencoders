@@ -2,66 +2,9 @@
 Simple tester
 """
 
+import sys
 import argparse
-
-PARSER = argparse.ArgumentParser(description="Autoencoder Test.")
-
-
-PARSER.add_argument("--train", dest='train', action='store_const',
-                    const=True, default=False, help="Launch on training mode.")
-
-PARSER.add_argument("--scratch", dest='from_scratch', action='store_const',
-                    const=True, default=False, help="Enable learning from scratch.")
-
-PARSER.add_argument("dataset_path", type=str, default="dataset",
-                    help="Path of the json dataset file.")
-
-PARSER.add_argument("doc_length", type=int, default=500,
-                    help="Length of a temporal document.")
-
-PARSER.add_argument("doc_height", type=int, default=10,
-                    help="Height of a temporal document.")
-
-PARSER.add_argument("nb_filters", type=int, default=10,
-                    help="Number of filters given.")
-
-PARSER.add_argument("filters_length", type=int, default=45,
-                    help="Length of the given filters.")
-
-PARSER.add_argument("weights_path", type=str, default="ae_weights.npy",
-                    help="Path of the network weigths file.")
-
-PARSER.add_argument("iterations", type=int, default=1000,
-                    help="Number of training iterations.")
-
-PARSER.add_argument("batches_size", type=int, default=200,
-                    help="Number of examples in each batches")
-
-PARSER.add_argument("gradient_algorithm", type=str, default="adam",
-                    help="Algorithm used for gradient descent (SGD, momentum, ADAM).")
-
-PARSER.add_argument("learning_rate", type=float, default=0.0001,
-                    help="Learning rate used in training.")
-
-PARSER.add_argument("momentum", type=float, default=0.9,
-                    help="Momentum used in training.")
-
-PARSER.add_argument("lambdaGL", type=float, default=1.0,
-                    help="Group lasso coefficient on first encode filters and last decode filters.")
-
-PARSER.add_argument("lambdaL", type=float, default=0.001,
-                    help="Lasso coefficient on first encode filters and last decode filters.")
-
-PARSER.add_argument("lambdaKL", type=float, default=0.001,
-                    help="Kullback on latent coefficient.")
-
-PARSER.add_argument("expe_file", type=str, default="expe",
-                    help="Used as prefix of the output files path.")
-
-PARSER.add_argument("gpu", type=str, default="0",
-                    help="GPU-to-be-used index.")
-
-ARGV = PARSER.parse_args()
+import logging as log
 
 import tensorflow as tf
 import numpy as np
@@ -69,19 +12,19 @@ import numpy as np
 from AE import AutoEnc
 import dataset_loader_AE as loader
 
-def run_test():
+def run_test(argv):
     """ Launch network on chosen arguments """
     nb_channels = 1
 
-    run_name = ARGV.expe_file.split("/")
+    run_name = argv.expe_file.split("/")
     expe_group = run_name[1]
     run_name = run_name[0]
 
 
-    print("[INFO] Setting session variables")
+    log.info("Setting session variables")
 
-    with tf.device('/gpu:'+ARGV.gpu):
-        dataset_paths = loader.load_paths(ARGV.dataset_path)
+    with tf.device('/gpu:'+argv.gpu):
+        dataset_paths = loader.load_paths(argv.dataset_path)
 
         tf.reset_default_graph()
 
@@ -89,17 +32,17 @@ def run_test():
         config.gpu_options.allow_growth = True
         sess = tf.Session(config=config)
 
-        if ARGV.from_scratch:
+        if argv.from_scratch:
             auto_enc = AutoEnc()
         else:
-            auto_enc = AutoEnc(weights_path=ARGV.weights_path)
+            auto_enc = AutoEnc(weights_path=argv.weights_path)
 
-        images = tf.placeholder(tf.float32, [None, ARGV.doc_height, ARGV.doc_length, nb_channels])
+        images = tf.placeholder(tf.float32, [None, argv.doc_height, argv.doc_length, nb_channels])
 
         learning_rate = tf.placeholder(tf.float32)
 
-        print("[INFO] Build Autoencoder")
-        auto_enc.build(images, ARGV.nb_filters, ARGV.filters_length)
+        log.info("Build Autoencoder")
+        auto_enc.build(images, argv.nb_filters, argv.filters_length)
 
         # Lasso regularization
         #   forces weights to be zero so that remaining weights should be relevent
@@ -123,7 +66,6 @@ def run_test():
         kullback = -tf.reduce_mean(tf.reduce_sum(rho_hat*tf.log(rho_hat),
                                                  axis=(1, 2, 3)))
 
-
         # Log loss
         # out_prime = (auto_enc.outputs/(tf.reduce_sum(auto_enc.outputs, axis=(1, 2, 3))
         #                                + 10**(-9))
@@ -133,17 +75,17 @@ def run_test():
         # Mean Squared Error
         c_func = tf.reduce_mean(((auto_enc.outputs - images) ** 2))
 
-        cost = c_func + ARGV.lambdaL*lasso + ARGV.lambdaGL*grp_lasso + ARGV.lambdaKL*kullback
+        cost = c_func + argv.lambdaL*lasso + argv.lambdaGL*grp_lasso + argv.lambdaKL*kullback
 
-        algo = ARGV.gradient_algorithm.lower()
+        algo = argv.gradient_algorithm.lower()
         if algo == "sgd":
             train = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
         elif algo == "momentum":
-            train = tf.train.MomentumOptimizer(learning_rate, ARGV.momentum).minimize(cost)
+            train = tf.train.MomentumOptimizer(learning_rate, argv.momentum).minimize(cost)
         elif algo == "adam":
             train = tf.train.AdamOptimizer(learning_rate).minimize(cost)
         else:
-            print("[ERROR] Unknown gradient descent algorithm" + ARGV.gradient_algorithm)
+            log.error("Unknown gradient descent algorithm" + argv.gradient_algorithm)
             return None
 
         sess.run(tf.global_variables_initializer())
@@ -152,29 +94,29 @@ def run_test():
         tf.summary.scalar(expe_group + "/" + "cost", cost)
         summary_op = tf.summary.merge_all()
 
-        if ARGV.train:
-            print("[INFO] Train step")
+        if argv.train:
+            log.info("Train step")
 
-            for iterat in range(ARGV.iterations):
-                print("[INFO] iteration "+str(iterat+1)+"/"+str(ARGV.iterations))
+            for iterat in range(argv.iterations):
+                log.info("iteration "+str(iterat+1)+"/"+str(argv.iterations))
 
-                # print("[INFO] Load dataset batch")
+                # log.info("Load dataset batch")
                 minibatch = loader.load_minibatch(paths_dataset=dataset_paths,
-                                                  batch_size=ARGV.batches_size,
-                                                  img_height=ARGV.doc_height,
-                                                  img_width=ARGV.doc_length,
+                                                  batch_size=argv.batches_size,
+                                                  img_height=argv.doc_height,
+                                                  img_width=argv.doc_length,
                                                   nb_channels=nb_channels)
 
 
-                # print("[INFO] Run network")
+                # log.info("Run network")
 
                 _, summary = sess.run([train, summary_op], feed_dict={images: minibatch,
-                                                                      learning_rate: ARGV.learning_rate})
+                                                                      learning_rate: argv.learning_rate})
 
 
                 writer.add_summary(summary, iterat)
 
-        print("[INFO] Test step")
+        log.info("Test step")
         for variable in tf.trainable_variables():
             if "/filter" in variable.name:
                 save_path = variable.name.replace("/", "_")
@@ -195,11 +137,11 @@ def run_test():
 
         example_i = 0
         for image, _ in loader.load_test(paths_dataset=dataset_paths,
-                                         img_height=ARGV.doc_height,
-                                         img_width=ARGV.doc_length,
+                                         img_height=argv.doc_height,
+                                         img_width=argv.doc_length,
                                          nb_channels=nb_channels):
 
-            # print("[INFO] Run network")
+            # log.info("Run network")
             out, latent = sess.run([auto_enc.outputs, auto_enc.latent],
                                    feed_dict={images: image})
 
@@ -214,8 +156,68 @@ def run_test():
                 latent = np.expand_dims(latent, axis=3)
                 writer.add_summary(sess.run(tf.summary.image(expe_group + "/" + "latent_" + str(example_i), latent)))
 
-        auto_enc.save_npy(sess, ARGV.weights_path)
+        auto_enc.save_npy(sess, argv.weights_path)
 
 if __name__ == '__main__':
-    run_test()
+    PARSER = argparse.ArgumentParser(description="Autoencoder Test.")
 
+    PARSER.add_argument("--train", dest='train', action='store_const',
+                        const=True, default=False, help="Launch on training mode.")
+
+    PARSER.add_argument("--scratch", dest='from_scratch', action='store_const',
+                        const=True, default=False, help="Enable learning from scratch.")
+
+    PARSER.add_argument("dataset_path", type=str, default="dataset",
+                        help="Path of the json dataset file.")
+
+    PARSER.add_argument("doc_length", type=int, default=500,
+                        help="Length of a temporal document.")
+
+    PARSER.add_argument("doc_height", type=int, default=10,
+                        help="Height of a temporal document.")
+
+    PARSER.add_argument("nb_filters", type=int, default=10,
+                        help="Number of filters given.")
+
+    PARSER.add_argument("filters_length", type=int, default=45,
+                        help="Length of the given filters.")
+
+    PARSER.add_argument("weights_path", type=str, default="ae_weights.npy",
+                        help="Path of the network weigths file.")
+
+    PARSER.add_argument("iterations", type=int, default=1000,
+                        help="Number of training iterations.")
+
+    PARSER.add_argument("batches_size", type=int, default=200,
+                        help="Number of examples in each batches")
+
+    PARSER.add_argument("gradient_algorithm", type=str, default="adam",
+                        help="Algorithm used for gradient descent (SGD, momentum, ADAM).")
+
+    PARSER.add_argument("learning_rate", type=float, default=0.0001,
+                        help="Learning rate used in training.")
+
+    PARSER.add_argument("momentum", type=float, default=0.9,
+                        help="Momentum used in training.")
+
+    PARSER.add_argument("lambdaGL", type=float, default=1.0,
+                        help="Group lasso coefficient on first encode filters and last decode filters.")
+
+    PARSER.add_argument("lambdaL", type=float, default=0.001,
+                        help="Lasso coefficient on first encode filters and last decode filters.")
+
+    PARSER.add_argument("lambdaKL", type=float, default=0.001,
+                        help="Kullback on latent coefficient.")
+
+    PARSER.add_argument("expe_file", type=str, default="expe",
+                        help="Used as prefix of the output files path.")
+
+    PARSER.add_argument("gpu", type=str, default="0",
+                        help="GPU-to-be-used index.")
+
+    log.basicConfig(level=log.DEBUG,
+                    format="[%(levelname)s] [%(funcName)s:%(lineno)d] %(message)s",
+                    datefmt="%H:%M:%S",
+                    stream=sys.stdout)
+
+    run_test(PARSER.parse_args())

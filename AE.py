@@ -3,6 +3,7 @@
 """
 
 import os
+import logging as log
 import tensorflow as tf
 
 import numpy as np
@@ -27,7 +28,7 @@ class AutoEnc(object):
         elif weights_path is not None and os.path.isfile(weights_path):
             self.data_dict = np.load(weights_path).item()
         else:
-            print("[INFO] Learning from scratch !")
+            log.info("Learning from scratch !")
             self.data_dict = None
 
         self.var_dict = {}
@@ -185,12 +186,16 @@ class AutoEnc(object):
 
         for (name, idx), var in self.var_dict.items():
             var_out = sess.run(var)
+
             if not name in data_dict:
                 data_dict[name] = {}
+
             data_dict[name][idx] = var_out
 
         np.save(npy_path, data_dict)
-        print("file saved", npy_path)
+
+        log.info("Weight file %s saved", npy_path)
+
         return npy_path
 
 def ch_layer(layer):

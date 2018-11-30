@@ -1,5 +1,6 @@
 import os
 import re
+import logging as log
 from random import random
 
 import numpy as np
@@ -27,7 +28,7 @@ def read_dir(dir_path):
     if os.path.isdir(dir_path):
         return os.listdir(dir_path)
 
-    print("[ERROR] No directory with path " + dir_path)
+    log.error("No directory with path " + dir_path)
     return []
 
 
@@ -81,7 +82,7 @@ def load_minibatch(paths_dataset, batch_size, img_height, img_width, nb_channels
         rand_ex_i = int(random()*nb_examples)
 
         example_path = paths_dataset[rand_ex_i]
-        #print("[INFO] load image " + example_path)
+        #log.info("load image " + example_path)
 
         dataset[example_i] = load_tdoc(path=example_path,
                                        height=img_height,

@@ -116,7 +116,7 @@ def run_test(argv):
 
                 writer.add_summary(summary, iterat)
 
-            auto_enc.save_npy(sess, argv.weights_path)
+            auto_enc.save_npy(sess, argv.out_weights_path)
 
         log.info("Test step")
         for variable in tf.trainable_variables():
@@ -184,7 +184,10 @@ if __name__ == '__main__':
                         help="Length of the given filters.")
 
     PARSER.add_argument("--weights_path", type=str, default="ae_weights.npy",
-                        help="Path of the network weigths file.")
+                        help="If not scratch, path of the network weights file.")
+
+    PARSER.add_argument("--out_weights_path", type=str, default="trained_ae_weights.npy",
+                        help="If train, path where saving the final weights.")
 
     PARSER.add_argument("--iterations", type=int, default=1000,
                         help="Number of training iterations.")

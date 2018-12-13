@@ -57,7 +57,7 @@ class AutoEnc(object):
 
         with tf.variable_scope("encoder"):
             latent = self.conv_layer(self.inputs, nb_filters, filters_width,
-                                     "layer")
+                                     "encode_layer")
             return latent
 
     def decoder(self, batch_size, filters_height, filters_width):
@@ -65,7 +65,7 @@ class AutoEnc(object):
 
         with tf.variable_scope("decoder"):
             output = self.deconv_layer(self.latent, batch_size, 1, filters_height, filters_width,
-                                       "layer")
+                                       "decode_layer")
             return output
 
     def conv_layer(self, inputs, out_channels, filters_length, name, stride=1):
@@ -97,7 +97,7 @@ class AutoEnc(object):
                                                                   filters_width,
                                                                   out_channels,
                                                                   latent_shape[-1],
-                                                                  "1")
+                                                                  name)
             output_shape = (batch_size,
                             latent_shape[1]*stride+filters_height-stride,
                             latent_shape[2]*stride+filters_width-stride,
@@ -143,7 +143,7 @@ class AutoEnc(object):
         var = tf.Variable(self.get_value(initial_value, name),
                           name=var_name)
 
-        self.var_dict[(name, idx)] = var
+        self.var_dict[name] = var
 
         assert var.get_shape() == initial_value.get_shape()
 
@@ -173,14 +173,9 @@ class AutoEnc(object):
         """ get a value from pretrained weights if exists """
 
         if self.data_dict is not None and name in self.data_dict:
-            weight = self.data_dict[name]
+            return self.data_dict[name]
 
-            if isinstance(weight, dict):
-                weight = weight[0]
-
-            return weight
-        else:
-            return initial_value
+        return initial_value
 
     def save_npy(self, sess, npy_path):
         """ Save tensorflow session in npy files """
@@ -189,17 +184,14 @@ class AutoEnc(object):
 
         data_dict = {}
 
-        for (name, idx), var in self.var_dict.items():
+        for name, var in self.var_dict.items():
             var_out = sess.run(var)
 
-            if not name in data_dict:
-                data_dict[name] = {}
-
-            data_dict[name][idx] = var_out
+            data_dict[name] = var_out
 
         np.save(npy_path, data_dict)
 
-        log.info("Weight file %s saved", npy_path)
+        log.info("Weights saved to %s", npy_path)
 
         return npy_path
 

@@ -79,7 +79,7 @@ def load_minibatch(paths_dataset, batch_size, img_height, img_width, nb_channels
 
 
     for example_i in range(batch_size):
-        rand_ex_i = int(random()*nb_examples)
+        rand_ex_i = np.random.randint(0, nb_examples)
 
         example_path = paths_dataset[rand_ex_i]
         #log.info("load image " + example_path)
